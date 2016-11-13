@@ -1,12 +1,4 @@
-﻿/*******************************************************************************
-
-INTEL CORPORATION PROPRIETARY INFORMATION
-This software is supplied under the terms of a license agreement or nondisclosure
-agreement with Intel Corporation and may not be copied or disclosed except in
-accordance with the terms of that agreement
-Copyright(c) 2013 Intel Corporation. All Rights Reserved.
-
-*******************************************************************************/
+﻿
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -28,6 +20,7 @@ namespace voice_recognition.cs
 
 		public string g_file; //SM: ToDo function for return the file
 		public string v_file; //SM: ToDo function for return the file
+		string[] OrderWords = { "立ちなさい", "座りなさい", "飛びなさい", "歩きなさい" };
 
 		public MainForm(PXCMSession session)
 		{
@@ -44,6 +37,8 @@ namespace voice_recognition.cs
 			FormClosing += new FormClosingEventHandler(MainForm_FormClosing);
 
 			label1.Text = null;
+			label3.Text = "0000";
+
 		}
 
 		public delegate void myLabel(string Mes);
@@ -329,6 +324,11 @@ namespace voice_recognition.cs
 //			Invoke(new PrintMessage(PrintRecognized));
 			
 			Console2.Invoke(new TreeViewUpdateDelegate(delegate(string line1) { Console2.Nodes.Add(line1).EnsureVisible(); }), new object[] { line });
+
+			if(checkBox1.Checked)
+			{
+				PerformClickButton1();
+			}
 		}
 
 		delegate void PrintMessage();
@@ -519,7 +519,35 @@ namespace voice_recognition.cs
 		private void button1_Click(object sender, EventArgs e)
 		{
 			textBox1.Text = LineTest;
+			AnalyseWords(textBox1.Text);
 		}
+
+
+		private void AnalyseWords(string Order)
+		{
+			if(Order == OrderWords[0])
+			{
+				label3.Text = "0001";
+			}
+			else if (Order == OrderWords[1])
+			{
+				label3.Text = "0002";
+			}
+			else if (Order == OrderWords[2])
+			{
+				label3.Text = "0003";
+			}
+			else if (Order == OrderWords[3])
+			{
+				label3.Text = "0004";
+			}
+
+
+
+		}
+
+
+
 
 		private void MainForm_Load(object sender, EventArgs e)
 		{
@@ -533,5 +561,28 @@ namespace voice_recognition.cs
 			PutLabel1Text("初期化中...");
 		}
 
+		delegate void PerformClickButton();
+		void PerformClickButton1()
+		{
+			if (this.button1.InvokeRequired)
+			{
+				PerformClickButton d = new PerformClickButton(PerformClickButton1);
+				this.Invoke(d, new object[] { });
+			}
+			else
+			{
+				this.button1.PerformClick();
+			}
+		}
+
+		private void checkBox1_CheckedChanged(object sender, EventArgs e)
+		{
+
+		}
+
+		private void label4_Click(object sender, EventArgs e)
+		{
+
+		}
 	}
 }

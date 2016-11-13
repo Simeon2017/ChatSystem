@@ -1,23 +1,26 @@
-﻿using System;
+﻿/*******************************************************************************
+
+INTEL CORPORATION PROPRIETARY INFORMATION
+This software is supplied under the terms of a license agreement or nondisclosure
+agreement with Intel Corporation and may not be copied or disclosed except in
+accordance with the terms of that agreement
+Copyright(c) 2013 Intel Corporation. All Rights Reserved.
+
+*******************************************************************************/
+using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
 using System.Drawing;
 using System.Linq;
 using System.Text;
-using System.Diagnostics;
 using System.Windows.Forms;
 
-namespace ChatSystem
+namespace voice_recognition.cs
 {
 	public partial class MainForm : Form
 	{
-		public Form1 form1;
 		string LineTest;
-		public bool isTalking = false;
-		public bool isInitialize = true;
-
-		bool FirstTimeFlag = true;
 
 		private PXCMSession session;
 		private Dictionary<ToolStripMenuItem, Int32> modules = new Dictionary<ToolStripMenuItem, int>();
@@ -25,16 +28,12 @@ namespace ChatSystem
 
 		public string g_file; //SM: ToDo function for return the file
 		public string v_file; //SM: ToDo function for return the file
-		System.Threading.Thread DoVoiceThread = null;
-		bool isAutoSend = true;
 
-		string[] toDocomoAPISendMes = {"認識がうまくいったら「認識OK」ボタンを押してね", "自動応答中"};
-		public MainForm(PXCMSession Session)
+		public MainForm(PXCMSession session)
 		{
-			this.session = Session;
-
 			InitializeComponent();
 
+			this.session = session;
 			PopulateSource();
 			PopulateModule();
 			PopulateLanguage();
@@ -42,36 +41,27 @@ namespace ChatSystem
 
 			Console2.AfterLabelEdit += new NodeLabelEditEventHandler(Console2_AfterLabelEdit);
 			Console2.KeyDown += new KeyEventHandler(Console2_KeyDown);
+			FormClosing += new FormClosingEventHandler(MainForm_FormClosing);
 
 			label1.Text = null;
-			label2.Text = null;
-			label3.Text = null;
-			label4.Text = toDocomoAPISendMes[1];
-
-			timer1.Interval = 100;
-			timer1.Start();
 		}
 
-		public delegate void myLabel(string MesLabel1, string MesLabel2);
-		public void PutLabel1Text(string Mes1, string Mes2)
+		public delegate void myLabel(string Mes);
+		public void PutLabel1Text(string Mes)
 		{
 			if (this.label1.InvokeRequired)
 			{
 				myLabel d = new myLabel(PutLabel1Text);
-				this.Invoke(d, new object[] { Mes1, Mes2 });
+				this.Invoke(d, new object[] { Mes });
 			}
 			else
 			{
-				this.label1.Text = Mes1;
-				this.label3.Text = Mes2;
-				this.label1.Invalidate();
-				this.label3.Invalidate();
+				this.label1.Text = Mes;
 			}
 		}
 
 		private void PopulateSource()
 		{
-			int SourceNo = -1;
 			ToolStripMenuItem sm = new ToolStripMenuItem("Source");
 			devices.Clear();
 
@@ -88,17 +78,13 @@ namespace ChatSystem
 					ToolStripMenuItem sm1 = new ToolStripMenuItem(dinfo.name, null, new EventHandler(Source_Item_Click));
 					devices[sm1] = dinfo;
 					sm.DropDownItems.Add(sm1);
-
-					if((sm1.ToString()).IndexOf("マイク") >= 0)
-					{
-						SourceNo = i;
-					}
 				}
+
 				source.Dispose();
 			}
 
 			if (sm.DropDownItems.Count > 0)
-				(sm.DropDownItems[SourceNo] as ToolStripMenuItem).Checked = true;
+				(sm.DropDownItems[0] as ToolStripMenuItem).Checked = true;
 			MainMenu.Items.RemoveAt(0);
 			MainMenu.Items.Insert(0, sm);
 		}
@@ -234,7 +220,7 @@ namespace ChatSystem
 		private void commandControlToolStripMenuItem_Click(object sender, EventArgs e)
 		{
 			Status2.Nodes.Clear();
-			//			ConsoleMode.Text = "Command Control:";
+//			ConsoleMode.Text = "Command Control:";
 			commandControlToolStripMenuItem.Checked = true;
 			dictationToolStripMenuItem.Checked = false;
 			Console2.Nodes.Clear();
@@ -247,7 +233,7 @@ namespace ChatSystem
 		private void dictationToolStripMenuItem_Click(object sender, EventArgs e)
 		{
 			Status2.Nodes.Clear();
-			//			ConsoleMode.Text = "Dictation:";
+//			ConsoleMode.Text = "Dictation:";
 			commandControlToolStripMenuItem.Checked = false;
 			dictationToolStripMenuItem.Checked = true;
 			Console2.LabelEdit = false;
@@ -256,27 +242,35 @@ namespace ChatSystem
 			Console2.Nodes.Clear();
 		}
 
+		private void Start_Click(object sender, EventArgs e)
+		{
+//			Start.Enabled = false;
+			Stop.Enabled = true;
+			MainMenu.Enabled = false;
+
+			stop = false;
+			System.Threading.Thread thread = new System.Threading.Thread(DoVoiceRecognition);
+			thread.Start();
+			PutLabel1Text("初期化中...");
+
+//			System.Threading.Thread.Sleep(5);
+		}
+
 		private delegate void VoiceRecognitionCompleted();
 		private void DoVoiceRecognition()
 		{
 			VoiceRecognition vr = new VoiceRecognition();
 			vr.DoIt(this, session);
 
-			try
-			{
-				this.Invoke(new VoiceRecognitionCompleted(
-					delegate
-					{
-						borderlessButton4.Enabled = false;
-						MainMenu.Enabled = true;
-						if (closing) Close();
-					}
-				));
-			}
-			catch
-			{
-				;
-			}
+			this.Invoke(new VoiceRecognitionCompleted(
+				delegate
+				{
+					//Start.Enabled = true;
+					Stop.Enabled = false;
+					MainMenu.Enabled = true;
+					if (closing) Close();
+				}
+			));
 		}
 
 		private void Stop_Click(object sender, EventArgs e)
@@ -330,32 +324,12 @@ namespace ChatSystem
 		private delegate void TreeViewUpdateDelegate(string line);
 		public void PrintConsole(string line)
 		{
-			/////////////////////////////////////////// 認識結果の獲得
-			if (!form1.GetTalkingStatus())
-			{
-				LineTest = line;
-				Console2.Invoke(new TreeViewUpdateDelegate(delegate(string line1) { Console2.Nodes.Add(line1).EnsureVisible(); }), new object[] { line });
-				if (isAutoSend)
-				{
-					PerformClickButton1();
-				}
-			}
+			///////////////////////////////////////////
+			LineTest = line;
+//			Invoke(new PrintMessage(PrintRecognized));
+			
+			Console2.Invoke(new TreeViewUpdateDelegate(delegate(string line1) { Console2.Nodes.Add(line1).EnsureVisible(); }), new object[] { line });
 		}
-
-		delegate void PerformClickButton();
-		void PerformClickButton1()
-		{
-			if (this.button1.InvokeRequired)
-			{
-				PerformClickButton d = new PerformClickButton(PerformClickButton1);
-				this.Invoke(d, new object[] { });
-			}
-			else
-			{
-				this.button1.PerformClick();
-			}
-		}
-
 
 		delegate void PrintMessage();
 		void PrintRecognized()
@@ -365,14 +339,7 @@ namespace ChatSystem
 
 		public void PrintStatus(string line)
 		{
-			try
-			{
-				Status2.Invoke(new TreeViewUpdateDelegate(delegate(string line1) { Status2.Nodes.Add(line1).EnsureVisible(); }), new object[] { line });
-			}
-			catch
-			{
-				;
-			}
+			Status2.Invoke(new TreeViewUpdateDelegate(delegate(string line1) { Status2.Nodes.Add(line1).EnsureVisible(); }), new object[] { line });
 		}
 
 		private delegate void ConsoleReplaceTextDelegate(TreeNode tn1, string text);
@@ -427,6 +394,13 @@ namespace ChatSystem
 			{
 				while ((line = file.ReadLine()) != null)
 				{
+
+		
+					
+					LineTest = line;
+					textBox1.Text = LineTest;
+
+
 					PrintConsole(line);
 				}
 				file.Close();
@@ -462,6 +436,13 @@ namespace ChatSystem
 			return stop;
 		}
 
+		private void MainForm_FormClosing(object sender, FormClosingEventArgs e)
+		{
+			stop = true;
+			e.Cancel = Stop.Enabled;
+			closing = true;
+		}
+
 		private void AlwaysAddNewCommand()
 		{
 			foreach (TreeNode tn in Console2.Nodes)
@@ -478,149 +459,78 @@ namespace ChatSystem
 			AlwaysAddNewCommand();
 		}
 
+		private void setGrammarFromFileToolStripMenuItem_Click(object sender, EventArgs e)
+		{
+			GrammarFileDialog.Filter = "jsgf files (*.jsgf)|*.jsgf|list files (*.list)|*.list|All files (*.*)|*.*";
+			GrammarFileDialog.FilterIndex = 1;
+			GrammarFileDialog.RestoreDirectory = true;
+
+			if (GrammarFileDialog.ShowDialog() == DialogResult.OK)
+			{
+				try
+				{
+					g_file = GrammarFileDialog.FileName;
+					setGrammarFromFileToolStripMenuItem.Checked = true;
+					Console2.Nodes.Clear();
+				}
+				catch (Exception ex)
+				{
+					MessageBox.Show("Error: Could not read file from disk. Original error: " + ex.Message);
+				}
+			}
+			else
+			{
+				setGrammarFromFileToolStripMenuItem.Checked = false;
+				g_file = null;
+
+				Console2.Nodes.Clear();
+				AlwaysAddNewCommand();
+
+			}
+
+		}
+
+		private void addVocabularyFromFileToolStripMenuItem_Click(object sender, EventArgs e)
+		{
+			VocabFileDialog.Filter = "txt files (*.txt)|*.txt|All files (*.*)|*.*";
+			VocabFileDialog.FilterIndex = 1;
+			VocabFileDialog.RestoreDirectory = true;
+
+			if (VocabFileDialog.ShowDialog() == DialogResult.OK)
+			{
+				try
+				{
+					v_file = VocabFileDialog.FileName;
+					addVocabularyFromFileToolStripMenuItem.Checked = true;
+					Console2.Nodes.Clear();
+				}
+				catch (Exception ex)
+				{
+					MessageBox.Show("Error: Could not read file from disk. Original error: " + ex.Message);
+				}
+			}
+			else
+			{
+				addVocabularyFromFileToolStripMenuItem.Checked = false;
+				v_file = null;
+			}
+		}
+
 		private void button1_Click(object sender, EventArgs e)
 		{
 			textBox1.Text = LineTest;
-			doChat();
 		}
 
-		private void doChat()
+		private void MainForm_Load(object sender, EventArgs e)
 		{
-			form1.ConnectDocomoAPI(LineTest);
-
-			string Mes_yomi = form1.DocomoTalkMes_yomi;
-			string Mes_utt = form1.DocomoTalkMes_utt;
-			form1.voiceSetClientSendMsg(Mes_yomi, Mes_utt);
-			form1.ExternPutTextBox5(Mes_utt);
-		}
-
-		private void MainForm_Load_1(object sender, EventArgs e)
-		{
-			this.Location = new Point(form1.Location.X, form1.Location.Y + form1.Height + 10); 
-			this.ActiveControl = this.button1;
-			this.FormBorderStyle = FormBorderStyle.FixedSingle;
-			this.TopMost = true;
-			this.MaximizeBox = false;
-
-			borderlessButton4.Enabled = true;
-			borderlessButton1.BackColor = Color.MistyRose;
+			//Start.Enabled = false;
+			Stop.Enabled = true;
 			MainMenu.Enabled = false;
 
 			stop = false;
-			label1.Text = "初期化中...";
-			this.button1.ForeColor = Color.DarkGray;
-			DoVoiceThread = new System.Threading.Thread(DoVoiceRecognition);
-			///////////////////////////////////
-			DoVoiceThread.IsBackground = true;
-			DoVoiceThread.Start();
-			System.Threading.Thread.Sleep(500);
-		}
-
-		private void MainForm_FormClosing_1(object sender, FormClosingEventArgs e)
-		{
-			label1.Text = "終了中";
-			stop = true;
-			System.Threading.Thread.Sleep(200);
-			timer1.Stop();
-			closing = true;
-		}
-
-		private void borderlessButton1_Click(object sender, EventArgs e)
-		{
-			Process[] ps = Process.GetProcessesByName(Form1.UnityExecName);
-			if (0 < ps.Length)
-			{
-				//見つかった時は、アクティブにする
-				Microsoft.VisualBasic.Interaction.AppActivate(ps[0].Id);
-			}
-		}
-
-		public void putTextLabel(string Mes)
-		{
-			string MesTmp = null;
-			if (Mes.Length >= 22)
-			{
-				MesTmp = Mes.Substring(0, 21) + "…";
-			}
-			else
-			{
-				MesTmp = Mes;
-			}
-			label2.Text = MesTmp;
-		}
-
-		private void borderlessButton4_Click(object sender, EventArgs e)
-		{
-			this.Close();
-		}
-
-		private void timer1_Tick(object sender, EventArgs e)
-		{
-			//			if (isInitialize)
-			//			{
-			//				int a;
-			//				a = 1;
-			//
-			//				return;
-			//			}
-
-			//			isTalking = form1.GetTalkingStatus();
-			isTalking = false;
-			string Label1Mes = null;
-			string Label3Mes = null;
-			if (isTalking)
-			{
-				label1.ForeColor = Color.Red;
-				label3.ForeColor = Color.Red;
-				Label1Mes = "ゆうきたんお話中...";
-				Label3Mes = "ちょっと待ってて";
-			}
-			else
-			{
-				label1.ForeColor = Color.Black;
-				label3.ForeColor = Color.Black;
-				Label1Mes = "音声認識中...";
-				Label3Mes = "マイクに向かって何か話して";
-			}
-			PutLabel1Text(Label1Mes, Label3Mes);
-		}
-
-		private void checkBox1_CheckedChanged(object sender, EventArgs e)
-		{
-			if (checkBox1.Checked)
-			{
-				this.button1.ForeColor = Color.DarkGray;
-				label4.Enabled = false;
-				label4.Text = toDocomoAPISendMes[1];
-				isAutoSend = true;
-			}
-			else
-			{
-				this.button1.ForeColor = Color.Black;
-				label4.Enabled = true;
-				label4.Text = toDocomoAPISendMes[0];
-				isAutoSend = false;
-			}
-		}
-
-		private void MainForm_LocationChanged(object sender, EventArgs e)
-		{
-			Control c = (Control)sender;
-			if (!FirstTimeFlag)
-			{
-				int NewX = c.Location.X;
-				int NewY = c.Location.Y - form1.Height - 10;
-				if (NewX <= 0)
-				{
-					NewX = 0;
-				}
-				if (NewY <= 0)
-				{
-					NewY = 0;
-				}
-				form1.Location = new Point(NewX, NewY);
-			}
-			FirstTimeFlag = false;
+			System.Threading.Thread thread = new System.Threading.Thread(DoVoiceRecognition);
+			thread.Start();
+			PutLabel1Text("初期化中...");
 		}
 
 	}

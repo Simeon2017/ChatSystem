@@ -52,7 +52,9 @@
 			this.label3 = new System.Windows.Forms.Label();
 			this.label4 = new System.Windows.Forms.Label();
 			this.label5 = new System.Windows.Forms.Label();
+			this.pictureBox1 = new System.Windows.Forms.PictureBox();
 			this.MainMenu.SuspendLayout();
+			((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).BeginInit();
 			this.SuspendLayout();
 			// 
 			// MainMenu
@@ -151,7 +153,7 @@
 			// Stop
 			// 
 			this.Stop.Enabled = false;
-			this.Stop.Location = new System.Drawing.Point(173, 261);
+			this.Stop.Location = new System.Drawing.Point(173, 284);
 			this.Stop.Name = "Stop";
 			this.Stop.Size = new System.Drawing.Size(75, 21);
 			this.Stop.TabIndex = 5;
@@ -167,7 +169,7 @@
 			// 
 			this.textBox1.Location = new System.Drawing.Point(12, 209);
 			this.textBox1.Name = "textBox1";
-			this.textBox1.Size = new System.Drawing.Size(188, 19);
+			this.textBox1.Size = new System.Drawing.Size(130, 19);
 			this.textBox1.TabIndex = 6;
 			// 
 			// Console2
@@ -216,7 +218,7 @@
 			// label2
 			// 
 			this.label2.AutoSize = true;
-			this.label2.Location = new System.Drawing.Point(13, 246);
+			this.label2.Location = new System.Drawing.Point(13, 243);
 			this.label2.Name = "label2";
 			this.label2.Size = new System.Drawing.Size(62, 12);
 			this.label2.TabIndex = 10;
@@ -225,7 +227,7 @@
 			// label3
 			// 
 			this.label3.AutoSize = true;
-			this.label3.Location = new System.Drawing.Point(76, 246);
+			this.label3.Location = new System.Drawing.Point(76, 243);
 			this.label3.Name = "label3";
 			this.label3.Size = new System.Drawing.Size(35, 12);
 			this.label3.TabIndex = 11;
@@ -235,7 +237,7 @@
 			// 
 			this.label4.AutoSize = true;
 			this.label4.Font = new System.Drawing.Font("MS UI Gothic", 9F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(128)));
-			this.label4.Location = new System.Drawing.Point(44, 299);
+			this.label4.Location = new System.Drawing.Point(6, 299);
 			this.label4.Name = "label4";
 			this.label4.Size = new System.Drawing.Size(152, 12);
 			this.label4.TabIndex = 11;
@@ -252,11 +254,24 @@
 			this.label5.Text = "2016 Coplyleft(c) HAL東京 先端ロボット開発学科";
 			this.label5.Click += new System.EventHandler(this.label4_Click);
 			// 
+			// pictureBox1
+			// 
+			this.pictureBox1.BackColor = System.Drawing.Color.White;
+			this.pictureBox1.BorderStyle = System.Windows.Forms.BorderStyle.Fixed3D;
+			this.pictureBox1.Image = global::DF_SpeechRecognition.cs.Properties.Resources.default_open;
+			this.pictureBox1.Location = new System.Drawing.Point(148, 161);
+			this.pictureBox1.Name = "pictureBox1";
+			this.pictureBox1.Size = new System.Drawing.Size(100, 100);
+			this.pictureBox1.SizeMode = System.Windows.Forms.PictureBoxSizeMode.Zoom;
+			this.pictureBox1.TabIndex = 12;
+			this.pictureBox1.TabStop = false;
+			// 
 			// MainForm
 			// 
 			this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 12F);
 			this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
 			this.ClientSize = new System.Drawing.Size(261, 335);
+			this.Controls.Add(this.pictureBox1);
 			this.Controls.Add(this.label5);
 			this.Controls.Add(this.label4);
 			this.Controls.Add(this.label3);
@@ -277,6 +292,7 @@
 			this.Load += new System.EventHandler(this.MainForm_Load);
 			this.MainMenu.ResumeLayout(false);
 			this.MainMenu.PerformLayout();
+			((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).EndInit();
 			this.ResumeLayout(false);
 			this.PerformLayout();
 
@@ -307,5 +323,6 @@
 		private System.Windows.Forms.Label label3;
 		private System.Windows.Forms.Label label4;
 		private System.Windows.Forms.Label label5;
+		private System.Windows.Forms.PictureBox pictureBox1;
 	}
 }

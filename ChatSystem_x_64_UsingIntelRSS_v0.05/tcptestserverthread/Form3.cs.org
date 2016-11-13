@@ -1,0 +1,225 @@
+﻿using System;
+using System.Collections.Generic;
+using System.ComponentModel;
+using System.Data;
+using System.Drawing;
+using System.Text;
+using System.Windows.Forms;
+using System.Threading;
+using System.Speech.Recognition;
+using System.Diagnostics;
+
+namespace ChatSystem
+{
+	public partial class Form3 : Form
+	{
+		public Form1 form1;
+		// Form1 クラスのメンバ
+		private bool Recognizing;  // 認識中かどうか
+		private bool preparedEngine; // 認識エンジンが準備できたかどうか
+
+		string toDocomoAPISendMes = "認識がうまくいったら「認識OK」ボタンを押してね";
+
+		static SpeechRecognitionEngine engine;
+
+		Thread recognizeThread = null; // 認識用スレッド
+		String recognizedMessage;  // 認識結果確認用
+
+		public Form3()
+		{
+			InitializeComponent();
+			preparedEngine = false;
+			Recognizing = false;  // 認識中じゃない状態として初期化
+			Thread t1 = new Thread(new ThreadStart(InitializeRecognizer));
+			t1.Start();
+		}
+
+		private void Form3_Load(object sender, EventArgs e)
+		{
+			this.Location = new Point(form1.Location.X - 5, form1.Location.Y + form1.Height + 10); 
+//			this.Left = form1.Location.X;
+//			this.Top = form1.Location.Y + form1.Height + 10; 
+			this.MaximizeBox = false;
+			label1.Text = null;
+			label2.Text = null;
+			label3.Text = null;
+			label4.Text = null;
+			button1.Enabled = false;
+			borderlessButton1.BackColor = Color.MistyRose;
+			this.TopMost = true;
+		}
+
+#if true
+		private void checkBox1_CheckedChanged(object sender, EventArgs e)
+		{
+			if (Recognizing == true) // 認識中なら止める
+			{
+				if (preparedEngine == false) // (a)準備前に押された場合 
+				{
+					Recognizing = false;
+					return;
+				}
+
+				Recognizing = false;
+				checkBox1.Text = "認識開始";
+				label2.Text = "認識停止";
+				label3.Text = null;
+				label4.Text = null;
+				button1.Enabled = false;
+				//recognizeThread.Abort();
+
+			}
+			else  // 認識中じゃないなら認識を開始する
+			{
+				if (preparedEngine == false) // (b)準備前に押された場合 
+				{
+					Recognizing = true;
+					checkBox1.Checked = false;
+					MessageBox.Show("初期化完了までお待ちください");
+					return;
+				} // この後、ボタンの状態が変化したので (a) に飛ぶ
+
+				checkBox1.Text = "認識中・・・";
+
+				label2.Text = "音声認識中";
+				label3.Text = "マイクに向かって何か話してください";
+				label4.Text = toDocomoAPISendMes;
+				button1.Enabled = true;
+				button1.Focus();
+				checkBox1.Enabled = false;
+
+				Recognizing = true;
+				if (recognizeThread == null || recognizeThread.IsAlive == false)
+				{
+					recognizeThread = new Thread(new ThreadStart(RecognizeProcess));
+					recognizeThread.Start();
+				}
+			}
+		}
+#endif
+
+		void RecognizeProcess()
+		{
+			while (Recognizing)
+			{
+				engine.Recognize();
+			}
+		}
+
+		void DisplayRecognized(object sender, RecognitionEventArgs e)
+		{
+			// 認識結果を変数に格納。ファイルに保存することもできるはず（？）
+			recognizedMessage = e.Result.Text;
+
+			// 認識結果表示
+			// recognizeThread から、別スレッドで管理されている textBox1 を
+			// 操作するため、やや面倒な手続きを踏んでいる
+			Thread.Sleep(100);
+			Invoke(new PrintMessage(PrintRecognized));
+
+			// 認識結果が「終了」だったら終了するようにしてみた
+			// 「。」つきは Julius、なしは Microsoft
+			if (e.Result.Text == "終了。" || e.Result.Text == "終了")
+			{
+				Recognizing = false;
+				DialogResult r = MessageBox.Show("アプリケーションを終了します");
+
+				if (r == DialogResult.OK)
+				{
+					// 終了処理
+					this.Close();
+				}
+			}
+		}
+
+		void InitializeRecognizer()
+		{
+			engine = new SpeechRecognitionEngine();
+			engine.SpeechRecognized += DisplayRecognized;
+
+			// 初期化開始メッセージ表示
+			// 初期化用スレッド t1 から、別スレッドで管理されている textBox1 を
+			// 操作するため、やや面倒な手続きを踏んでいる
+			Invoke(new PrintMessage(InitializeMessage));
+
+			// この処理に時間がかかる
+			engine.LoadGrammar(new DictationGrammar());
+			engine.SetInputToDefaultAudioDevice();
+
+			preparedEngine = true;
+
+			// 初期化完了メッセージ表示
+			// 初期化用スレッド t1 から、別スレッドで管理されている textBox1 を
+			// 操作するため、やや面倒な手続きを踏んでいる
+			Invoke(new PrintMessage(InitializedMessage));
+		}
+
+		delegate void PrintMessage();
+
+		void InitializeMessage()
+		{
+			label2.Text ="認識エンジン初期化中・・・";
+		}
+
+		void InitializedMessage()
+		{
+			label2.Text = "認識エンジン初期化完了！";
+			label3.Text = null;
+			button1.Enabled = true;
+		}
+
+		void PrintRecognized()
+		{
+			//認識結果を改行 ("\n") つきで表示
+			textBox1.AppendText(recognizedMessage + "\n");
+		}
+
+		private void button1_Click(object sender, System.EventArgs e)
+		{
+			textBox2.Text = recognizedMessage;
+			form1.ConnectDocomoAPI(recognizedMessage);
+
+			string Mes_yomi = form1.DocomoTalkMes_yomi;
+			string Mes_utt = form1.DocomoTalkMes_utt;
+			form1.voiceSetClientSendMsg(Mes_yomi, Mes_utt);
+			form1.ExternPutTextBox5(Mes_utt);
+		}
+
+		public void putTextLabel(string Mes)
+		{
+			label1.Text = Mes;
+		}
+
+		private void Form3_FormClosing(object sender, FormClosingEventArgs e)
+		{
+			if (recognizeThread != null && recognizeThread.IsAlive == true)
+			{
+				recognizeThread.Abort();
+			}
+		}
+
+		private void borderlessButton1_Click(object sender, EventArgs e)
+		{
+			Process[] ps = Process.GetProcessesByName(Form1.UnityExecName);
+			if (0 < ps.Length)
+			{
+				//見つかった時は、アクティブにする
+				Microsoft.VisualBasic.Interaction.AppActivate(ps[0].Id);
+			}
+		}
+
+		private void borderlessButton4_Click(object sender, EventArgs e)
+		{
+			if (Recognizing == true) // 認識中なら止める
+			{
+				if (preparedEngine == false) // (a)準備前に押された場合 
+				{
+					Recognizing = false;
+					return;
+				}
+				Recognizing = false;
+			}
+			this.Close();
+		}
+	}
+}

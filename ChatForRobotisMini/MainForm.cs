@@ -77,7 +77,7 @@ namespace voice_recognition.cs
 
 		private void PopulateSource()
 		{
-			ToolStripMenuItem sm = new ToolStripMenuItem("Source");
+			ToolStripMenuItem sm = new ToolStripMenuItem("マイク");
 			devices.Clear();
 
 			PXCMAudioSource source = session.CreateAudioSource();
@@ -106,7 +106,7 @@ namespace voice_recognition.cs
 
 		private void PopulateModule()
 		{
-			ToolStripMenuItem mm = new ToolStripMenuItem("Module");
+			ToolStripMenuItem mm = new ToolStripMenuItem("モジュール");
 			modules.Clear();
 
 			PXCMSession.ImplDesc desc = new PXCMSession.ImplDesc();
@@ -136,7 +136,7 @@ namespace voice_recognition.cs
 			PXCMSpeechRecognition vrec;
 			if (session.CreateImpl<PXCMSpeechRecognition>(desc, out vrec) < pxcmStatus.PXCM_STATUS_NO_ERROR) return;
 
-			ToolStripMenuItem lm = new ToolStripMenuItem("Language");
+			ToolStripMenuItem lm = new ToolStripMenuItem("言語");
 			for (int i = 0; ; i++)
 			{
 				PXCMSpeechRecognition.ProfileInfo pinfo;
@@ -187,7 +187,7 @@ namespace voice_recognition.cs
 		{
 			foreach (ToolStripMenuItem m in MainMenu.Items)
 			{
-				if (!m.Text.Equals("Language")) continue;
+				if (!m.Text.Equals("言語")) continue;
 				for (int i = 0; i < m.DropDownItems.Count; i++)
 				{
 					if (m.DropDownItems[i] == null)
@@ -573,7 +573,7 @@ namespace voice_recognition.cs
 		{
 			//Start.Enabled = false;
 			Stop.Enabled = true;
-			MainMenu.Enabled = false;
+			MainMenu.Enabled = true;
 
 			stop = false;
 			System.Threading.Thread thread = new System.Threading.Thread(DoVoiceRecognition);

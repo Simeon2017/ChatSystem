@@ -8,6 +8,9 @@ using System.Linq;
 using System.Text;
 using System.Windows.Forms;
 using System.Threading;
+using System.Net;
+using System.Net.Sockets;
+using System.Diagnostics;
 
 
 namespace voice_recognition.cs
@@ -17,6 +20,14 @@ namespace voice_recognition.cs
 
 		string ipString = "127.0.0.1";
 		int port = 50377;
+
+		public const string UnityExecName = "Robotis_vsido_connect";
+		string UnityExecNameFullPath = null;
+		Process UnityProcess = null;
+		string stCurrentDir = null;
+
+		string DEBUG_STR = null;
+
 
 		System.IO.MemoryStream ms = null;
 		System.Net.Sockets.NetworkStream ns = null;
@@ -58,6 +69,10 @@ namespace voice_recognition.cs
 
 			label1.Text = null;
 			label3.Text = "0000";
+			stCurrentDir = System.Environment.CurrentDirectory;
+
+			UnityExecNameFullPath = stCurrentDir + @"\Unity\" + UnityExecName;
+			label6.Text = null;
 
 		}
 
@@ -458,9 +473,21 @@ namespace voice_recognition.cs
 
 		private void MainForm_FormClosing(object sender, FormClosingEventArgs e)
 		{
+			if (ServerThread != null && ServerThread.IsAlive)
+			{
+				ns.Close();
+				client.Close();
+				listener.Stop();
+				ServerThread.Abort();
+				UnityProcess.Kill();
+				UnityProcess.Close();
+				UnityProcess.Dispose();
+			}
+
 			stop = true;
 			e.Cancel = Stop.Enabled;
 			closing = true;
+
 		}
 
 		private void AlwaysAddNewCommand()
@@ -561,13 +588,7 @@ namespace voice_recognition.cs
 			{
 				label3.Text = "0004";
 			}
-
-
-
 		}
-
-
-
 
 		private void MainForm_Load(object sender, EventArgs e)
 		{
@@ -576,9 +597,9 @@ namespace voice_recognition.cs
 			MainMenu.Enabled = true;
 
 			stop = false;
-			System.Threading.Thread thread = new System.Threading.Thread(DoVoiceRecognition);
-			thread.Start();
-			PutLabel1Text("初期化中...");
+//			System.Threading.Thread thread = new System.Threading.Thread(DoVoiceRecognition);
+//			thread.Start();
+//			PutLabel1Text("初期化中...");
 		}
 
 		delegate void PerformClickButton();
@@ -604,5 +625,108 @@ namespace voice_recognition.cs
 		{
 
 		}
+
+		private void button2_Click(object sender, EventArgs e)
+		{
+			ServerWaitingThread = new Thread(ServerWaiting);
+			ServerWaitingThread.Priority = ThreadPriority.Lowest;
+			ServerWaitingThread.Start();
+			button2.Enabled = false;
+			UnityProcess = Process.Start(UnityExecNameFullPath, "-popupwindow");
+
+		}
+		void ServerWaiting()
+		{
+			System.Net.IPAddress ipAdd = System.Net.IPAddress.Parse(ipString);
+			listener = new System.Net.Sockets.TcpListener(ipAdd, port);
+			listener.Start();
+			HostIP_Port = ((IPEndPoint)listener.LocalEndpoint).Address.ToString() + " : " + ((IPEndPoint)listener.LocalEndpoint).Port.ToString();
+			client = listener.AcceptTcpClient();
+			ClientIP_Port = ((IPEndPoint)client.Client.RemoteEndPoint).Address.ToString() + " : " + ((System.Net.IPEndPoint)client.Client.RemoteEndPoint).Port.ToString();
+			DispIPInfo();
+
+			DEBUG_STR = "Client: Connect\n" + ClientIP_Port;
+			DispIPInfo();
+
+			ServerThread = new Thread(ServerReadWrite);
+			ServerThread.Priority = ThreadPriority.Lowest;
+			ServerThread.Start();
+
+			System.Threading.Thread thread = new System.Threading.Thread(DoVoiceRecognition);
+			thread.Start();
+			PutLabel1Text("初期化中...");
+
+		}
+
+		delegate void MyText();
+		private void DispIPInfo()
+		{
+			if (this.label6.InvokeRequired)
+			{
+				MyText d = new MyText(DispIPInfo);
+				this.Invoke(d);
+			}
+			else
+			{
+				//				label32.Text = "Client: Connected" + ClientIP_Port;
+				label6.Text = DEBUG_STR;
+				button1.Enabled = true;
+				Stop.Enabled = true;
+
+
+
+			}
+		}
+
+		void ServerReadWrite()
+		{
+			while (true)
+			{
+				//				resMsg = null;
+				ns = client.GetStream();
+				ns.ReadTimeout = Timeout.Infinite;
+				ns.WriteTimeout = Timeout.Infinite;
+
+				bool disconnected = false;
+				ms = new System.IO.MemoryStream();
+				byte[] resBytes = new byte[256];
+				int resSize = 0;
+				do
+				{
+					try
+					{
+						resSize = ns.Read(resBytes, 0, resBytes.Length);
+						if (resSize == 0)
+						{
+							disconnected = true;
+							Console.WriteLine("クライアントが切断しました。");
+							ServerThread.Abort();
+							break;
+						}
+						ms.Write(resBytes, 0, resSize);
+					}
+					catch
+					{
+						;
+					}
+				} while (ns.DataAvailable || resBytes[resSize - 1] != '\n');
+
+				resMsg = enc.GetString(ms.GetBuffer(), 0, (int)ms.Length);
+				ms.Close();
+				resMsg = resMsg.TrimEnd('\n');
+
+				FromClientMessage = resMsg.Split(':');
+				//				string rcvMsgNo = FromClientMessage[0] + ";" + FromClientMessage[1];
+				//				string rcvMsg = FromClientMessage[2];
+				//				PutServerText();
+				if (!disconnected)
+				{
+					string sendMsg = resMsg.Length.ToString();
+					byte[] sendBytes = enc.GetBytes(sendMsg + '\n');
+					Console.WriteLine(sendMsg);
+				}
+			}
+		}
+
 	}
 }

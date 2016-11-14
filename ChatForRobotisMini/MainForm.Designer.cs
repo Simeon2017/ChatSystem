@@ -53,6 +53,8 @@
 			this.label4 = new System.Windows.Forms.Label();
 			this.label5 = new System.Windows.Forms.Label();
 			this.pictureBox1 = new System.Windows.Forms.PictureBox();
+			this.button2 = new System.Windows.Forms.Button();
+			this.label6 = new System.Windows.Forms.Label();
 			this.MainMenu.SuspendLayout();
 			((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).BeginInit();
 			this.SuspendLayout();
@@ -66,7 +68,7 @@
             this.modeToolStripMenuItem});
 			this.MainMenu.Location = new System.Drawing.Point(0, 0);
 			this.MainMenu.Name = "MainMenu";
-			this.MainMenu.Size = new System.Drawing.Size(261, 26);
+			this.MainMenu.Size = new System.Drawing.Size(256, 26);
 			this.MainMenu.TabIndex = 0;
 			this.MainMenu.Text = "MainMenu";
 			// 
@@ -141,7 +143,7 @@
 			// 
 			this.Status2.Enabled = false;
 			this.Status2.Indent = 5;
-			this.Status2.Location = new System.Drawing.Point(30, 366);
+			this.Status2.Location = new System.Drawing.Point(31, 370);
 			this.Status2.Name = "Status2";
 			this.Status2.ShowLines = false;
 			this.Status2.Size = new System.Drawing.Size(196, 20);
@@ -151,7 +153,7 @@
 			// Stop
 			// 
 			this.Stop.Enabled = false;
-			this.Stop.Location = new System.Drawing.Point(173, 297);
+			this.Stop.Location = new System.Drawing.Point(173, 315);
 			this.Stop.Name = "Stop";
 			this.Stop.Size = new System.Drawing.Size(75, 21);
 			this.Stop.TabIndex = 5;
@@ -165,7 +167,7 @@
 			// 
 			// textBox1
 			// 
-			this.textBox1.Location = new System.Drawing.Point(12, 228);
+			this.textBox1.Location = new System.Drawing.Point(12, 246);
 			this.textBox1.Name = "textBox1";
 			this.textBox1.Size = new System.Drawing.Size(130, 19);
 			this.textBox1.TabIndex = 6;
@@ -175,7 +177,7 @@
 			this.Console2.FullRowSelect = true;
 			this.Console2.Indent = 5;
 			this.Console2.LabelEdit = true;
-			this.Console2.Location = new System.Drawing.Point(8, 54);
+			this.Console2.Location = new System.Drawing.Point(8, 77);
 			this.Console2.Name = "Console2";
 			this.Console2.ShowLines = false;
 			this.Console2.Size = new System.Drawing.Size(241, 105);
@@ -183,7 +185,7 @@
 			// 
 			// button1
 			// 
-			this.button1.Location = new System.Drawing.Point(67, 186);
+			this.button1.Location = new System.Drawing.Point(67, 204);
 			this.button1.Name = "button1";
 			this.button1.Size = new System.Drawing.Size(75, 23);
 			this.button1.TabIndex = 7;
@@ -194,7 +196,7 @@
 			// label1
 			// 
 			this.label1.AutoSize = true;
-			this.label1.Location = new System.Drawing.Point(5, 39);
+			this.label1.Location = new System.Drawing.Point(5, 62);
 			this.label1.Name = "label1";
 			this.label1.Size = new System.Drawing.Size(35, 12);
 			this.label1.TabIndex = 8;
@@ -205,7 +207,7 @@
 			this.checkBox1.AutoSize = true;
 			this.checkBox1.Checked = true;
 			this.checkBox1.CheckState = System.Windows.Forms.CheckState.Checked;
-			this.checkBox1.Location = new System.Drawing.Point(13, 190);
+			this.checkBox1.Location = new System.Drawing.Point(13, 208);
 			this.checkBox1.Name = "checkBox1";
 			this.checkBox1.Size = new System.Drawing.Size(48, 16);
 			this.checkBox1.TabIndex = 9;
@@ -216,7 +218,7 @@
 			// label2
 			// 
 			this.label2.AutoSize = true;
-			this.label2.Location = new System.Drawing.Point(13, 262);
+			this.label2.Location = new System.Drawing.Point(13, 280);
 			this.label2.Name = "label2";
 			this.label2.Size = new System.Drawing.Size(62, 12);
 			this.label2.TabIndex = 10;
@@ -225,7 +227,7 @@
 			// label3
 			// 
 			this.label3.AutoSize = true;
-			this.label3.Location = new System.Drawing.Point(76, 262);
+			this.label3.Location = new System.Drawing.Point(76, 280);
 			this.label3.Name = "label3";
 			this.label3.Size = new System.Drawing.Size(35, 12);
 			this.label3.TabIndex = 11;
@@ -235,7 +237,7 @@
 			// 
 			this.label4.AutoSize = true;
 			this.label4.Font = new System.Drawing.Font("MS UI Gothic", 9F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(128)));
-			this.label4.Location = new System.Drawing.Point(6, 312);
+			this.label4.Location = new System.Drawing.Point(3, 330);
 			this.label4.Name = "label4";
 			this.label4.Size = new System.Drawing.Size(152, 12);
 			this.label4.TabIndex = 11;
@@ -245,7 +247,7 @@
 			// label5
 			// 
 			this.label5.AutoSize = true;
-			this.label5.Location = new System.Drawing.Point(5, 328);
+			this.label5.Location = new System.Drawing.Point(3, 346);
 			this.label5.Name = "label5";
 			this.label5.Size = new System.Drawing.Size(253, 12);
 			this.label5.TabIndex = 11;
@@ -257,18 +259,39 @@
 			this.pictureBox1.BackColor = System.Drawing.Color.White;
 			this.pictureBox1.BorderStyle = System.Windows.Forms.BorderStyle.Fixed3D;
 			this.pictureBox1.Image = global::DF_SpeechRecognition.cs.Properties.Resources.default_open;
-			this.pictureBox1.Location = new System.Drawing.Point(148, 180);
+			this.pictureBox1.Location = new System.Drawing.Point(148, 198);
 			this.pictureBox1.Name = "pictureBox1";
 			this.pictureBox1.Size = new System.Drawing.Size(100, 100);
 			this.pictureBox1.SizeMode = System.Windows.Forms.PictureBoxSizeMode.Zoom;
 			this.pictureBox1.TabIndex = 12;
 			this.pictureBox1.TabStop = false;
 			// 
+			// button2
+			// 
+			this.button2.Location = new System.Drawing.Point(6, 32);
+			this.button2.Name = "button2";
+			this.button2.Size = new System.Drawing.Size(75, 23);
+			this.button2.TabIndex = 13;
+			this.button2.Text = "召喚";
+			this.button2.UseVisualStyleBackColor = true;
+			this.button2.Click += new System.EventHandler(this.button2_Click);
+			// 
+			// label6
+			// 
+			this.label6.AutoSize = true;
+			this.label6.Location = new System.Drawing.Point(106, 34);
+			this.label6.Name = "label6";
+			this.label6.Size = new System.Drawing.Size(35, 12);
+			this.label6.TabIndex = 14;
+			this.label6.Text = "label6";
+			// 
 			// MainForm
 			// 
 			this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 12F);
 			this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-			this.ClientSize = new System.Drawing.Size(261, 360);
+			this.ClientSize = new System.Drawing.Size(256, 364);
+			this.Controls.Add(this.label6);
+			this.Controls.Add(this.button2);
 			this.Controls.Add(this.pictureBox1);
 			this.Controls.Add(this.label5);
 			this.Controls.Add(this.label4);
@@ -322,5 +345,7 @@
 		private System.Windows.Forms.Label label4;
 		private System.Windows.Forms.Label label5;
 		private System.Windows.Forms.PictureBox pictureBox1;
+		private System.Windows.Forms.Button button2;
+		private System.Windows.Forms.Label label6;
 	}
 }

@@ -45,6 +45,8 @@ namespace voice_recognition.cs
 
 		string LineTest;
 
+		int ClientCommandNo = 0;
+
 		private PXCMSession session;
 		private Dictionary<ToolStripMenuItem, Int32> modules = new Dictionary<ToolStripMenuItem, int>();
 		private Dictionary<ToolStripMenuItem, PXCMAudioSource.DeviceInfo> devices = new Dictionary<ToolStripMenuItem, PXCMAudioSource.DeviceInfo>();
@@ -430,11 +432,8 @@ namespace voice_recognition.cs
 				while ((line = file.ReadLine()) != null)
 				{
 
-		
-					
 					LineTest = line;
 					textBox1.Text = LineTest;
-
 
 					PrintConsole(line);
 				}
@@ -572,22 +571,83 @@ namespace voice_recognition.cs
 
 		private void AnalyseWords(string Order)
 		{
-			if(Order == OrderWords[0])
+			string Cmd;
+			string Mes;
+
+			if (Order == OrderWords[0])
 			{
-				label3.Text = "0001";
+				ClientCommandNo = 1;
 			}
 			else if (Order == OrderWords[1])
 			{
-				label3.Text = "0002";
+				ClientCommandNo = 2;
 			}
 			else if (Order == OrderWords[2])
 			{
-				label3.Text = "0003";
+				ClientCommandNo = 3;
 			}
 			else if (Order == OrderWords[3])
 			{
-				label3.Text = "0004";
+				ClientCommandNo = 4;
 			}
+			else
+			{
+				ClientCommandNo = 0;
+			}
+
+
+			if (ClientCommandNo == 0)
+			{
+				Cmd = "0000";
+				Mes = null;
+			}
+			else if (ClientCommandNo == 1)
+			{
+				Cmd = "0001";
+				Mes = "うつよっ  ばーーん";
+			}
+			else if (ClientCommandNo == 2)
+			{
+				Cmd = "0002";
+				Mes = "やっほーー";
+			}
+			else if (ClientCommandNo == 3)
+			{
+				Cmd = "0003";
+				Mes = "えっ   なんだろー";
+			}
+			else if (ClientCommandNo == 4)
+			{
+				Cmd = "0004";
+				Mes = "ぐるぐる";
+			}
+			else
+			{
+				Cmd = "0000";
+				Mes = null;
+			}
+
+			ClientSendMsg = Cmd + ";" + Mes;
+
+			///////////////////////////////////////////////
+			//			if (ClientCommandNo != PreviousClientCommandNo && resMsg != "busy")
+			if (resMsg != "busy")
+			{
+				label3.Text = Cmd;
+				toClientSend();
+				pictureBox1.BackColor = Color.White;
+			}
+			else
+			{
+				label3.Text = Cmd;
+				pictureBox1.BackColor = Color.MistyRose;
+			}
+		}
+
+		void toClientSend()
+		{
+			byte[] sendBytes = enc.GetBytes(ClientSendMsg + '\n');
+			ns.Write(sendBytes, 0, sendBytes.Length);
 		}
 
 		private void MainForm_Load(object sender, EventArgs e)
@@ -596,10 +656,16 @@ namespace voice_recognition.cs
 			Stop.Enabled = true;
 			MainMenu.Enabled = true;
 
+			button1.Enabled = false;
+			checkBox1.Enabled = false;
+
 			stop = false;
-//			System.Threading.Thread thread = new System.Threading.Thread(DoVoiceRecognition);
-//			thread.Start();
-//			PutLabel1Text("初期化中...");
+
+			enc = System.Text.Encoding.UTF8;
+
+			//			System.Threading.Thread thread = new System.Threading.Thread(DoVoiceRecognition);
+			//			thread.Start();
+			//			PutLabel1Text("初期化中...");
 		}
 
 		delegate void PerformClickButton();
@@ -614,16 +680,6 @@ namespace voice_recognition.cs
 			{
 				this.button1.PerformClick();
 			}
-		}
-
-		private void checkBox1_CheckedChanged(object sender, EventArgs e)
-		{
-
-		}
-
-		private void label4_Click(object sender, EventArgs e)
-		{
-
 		}
 
 		private void button2_Click(object sender, EventArgs e)
@@ -655,7 +711,6 @@ namespace voice_recognition.cs
 			Thread thread = new System.Threading.Thread(DoVoiceRecognition);
 			thread.Start();
 			PutLabel1Text("初期化中...");
-
 		}
 
 		delegate void MyText();
@@ -672,9 +727,8 @@ namespace voice_recognition.cs
 				label6.Text = DEBUG_STR;
 				button1.Enabled = true;
 				Stop.Enabled = true;
-
-
-
+				checkBox1.Enabled = true;
+				MainMenu.Enabled = false;
 			}
 		}
 

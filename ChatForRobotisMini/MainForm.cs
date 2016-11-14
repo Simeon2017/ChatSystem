@@ -652,7 +652,7 @@ namespace voice_recognition.cs
 			ServerThread.Priority = ThreadPriority.Lowest;
 			ServerThread.Start();
 
-			System.Threading.Thread thread = new System.Threading.Thread(DoVoiceRecognition);
+			Thread thread = new System.Threading.Thread(DoVoiceRecognition);
 			thread.Start();
 			PutLabel1Text("初期化中...");
 

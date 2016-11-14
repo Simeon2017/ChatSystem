@@ -188,7 +188,8 @@ namespace voice_recognition.cs
 				if (sts >= pxcmStatus.PXCM_STATUS_NO_ERROR)
 				{
 					form.PrintStatus("Init OK");
-					form.PutLabel1Text("認識中...");
+					//					form.PutLabel1Text("認識中...");
+					form.PutLabel1Text("マイクに向かって話してください");
 
 					/* Wait until the stop button is clicked */
 					while (!form.IsStop())

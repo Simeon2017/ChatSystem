@@ -7,11 +7,31 @@ using System.Drawing;
 using System.Linq;
 using System.Text;
 using System.Windows.Forms;
+using System.Threading;
+
 
 namespace voice_recognition.cs
 {
 	public partial class MainForm : Form
 	{
+
+		string ipString = "127.0.0.1";
+		int port = 50377;
+
+		System.IO.MemoryStream ms = null;
+		System.Net.Sockets.NetworkStream ns = null;
+		System.Net.Sockets.TcpListener listener = null;
+		System.Net.Sockets.TcpClient client = null;
+		System.Text.Encoding enc = null;
+
+		Thread ServerThread = null;
+		Thread ServerWaitingThread = null;
+		string resMsg = "ready";
+		string HostIP_Port = null;
+		string ClientIP_Port = null;
+		string ClientSendMsg = null;
+		string[] FromClientMessage = null;
+
 		string LineTest;
 
 		private PXCMSession session;

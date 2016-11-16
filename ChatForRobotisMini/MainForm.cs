@@ -46,6 +46,7 @@ namespace voice_recognition.cs
 		string LineTest;
 
 		int ClientCommandNo = 0;
+		int SEND_CLIENT_INTERVAL = 500;
 
 		private PXCMSession session;
 		private Dictionary<ToolStripMenuItem, Int32> modules = new Dictionary<ToolStripMenuItem, int>();
@@ -307,6 +308,7 @@ namespace voice_recognition.cs
 
 		private void Stop_Click(object sender, EventArgs e)
 		{
+			timer1.Stop();
 			stop = true;
 			this.Close();
 		}
@@ -571,8 +573,6 @@ namespace voice_recognition.cs
 
 		private void AnalyseWords(string Order)
 		{
-			string Cmd;
-			string Mes;
 
 			if (Order == OrderWords[0])
 			{
@@ -593,54 +593,6 @@ namespace voice_recognition.cs
 			else
 			{
 				ClientCommandNo = 0;
-			}
-
-
-			if (ClientCommandNo == 0)
-			{
-				Cmd = "0000";
-				Mes = null;
-			}
-			else if (ClientCommandNo == 1)
-			{
-				Cmd = "0001";
-				Mes = "うつよっ  ばーーん";
-			}
-			else if (ClientCommandNo == 2)
-			{
-				Cmd = "0002";
-				Mes = "やっほーー";
-			}
-			else if (ClientCommandNo == 3)
-			{
-				Cmd = "0003";
-				Mes = "えっ   なんだろー";
-			}
-			else if (ClientCommandNo == 4)
-			{
-				Cmd = "0004";
-				Mes = "ぐるぐる";
-			}
-			else
-			{
-				Cmd = "0000";
-				Mes = null;
-			}
-
-			ClientSendMsg = Cmd + ";" + Mes;
-
-			///////////////////////////////////////////////
-			//			if (ClientCommandNo != PreviousClientCommandNo && resMsg != "busy")
-			if (resMsg != "busy")
-			{
-				label3.Text = Cmd;
-				toClientSend();
-				pictureBox1.BackColor = Color.White;
-			}
-			else
-			{
-				label3.Text = Cmd;
-				pictureBox1.BackColor = Color.MistyRose;
 			}
 		}
 
@@ -711,7 +663,18 @@ namespace voice_recognition.cs
 			Thread thread = new System.Threading.Thread(DoVoiceRecognition);
 			thread.Start();
 			PutLabel1Text("初期化中...");
+
+			// Thread内で System.Windows.Forms.Timer を起動する場合は Invoke を使う
+			Invoke(new StartTimer1_Delegate(StartTimer1));
 		}
+
+		delegate void StartTimer1_Delegate();
+		private void StartTimer1()
+		{
+			timer1.Interval = SEND_CLIENT_INTERVAL;
+			timer1.Start();
+		}
+
 
 		delegate void MyText();
 		private void DispIPInfo()
@@ -782,5 +745,58 @@ namespace voice_recognition.cs
 			}
 		}
 
+		private void timer1_Tick(object sender, EventArgs e)
+		{
+			string Cmd;
+			string Mes;
+
+			if (ClientCommandNo == 0)
+			{
+				Cmd = "0000";
+				Mes = null;
+			}
+			else if (ClientCommandNo == 1)
+			{
+				Cmd = "0001";
+				Mes = "うつよっ  ばーーん";
+			}
+			else if (ClientCommandNo == 2)
+			{
+				Cmd = "0002";
+				Mes = "やっほーー";
+			}
+			else if (ClientCommandNo == 3)
+			{
+				Cmd = "0003";
+				Mes = "えっ   なんだろー";
+			}
+			else if (ClientCommandNo == 4)
+			{
+				Cmd = "0004";
+				Mes = "ぐるぐる";
+			}
+			else
+			{
+				Cmd = "0000";
+				Mes = null;
+			}
+
+			ClientSendMsg = Cmd + ";" + Mes;
+
+			///////////////////////////////////////////////
+			//			if (ClientCommandNo != PreviousClientCommandNo && resMsg != "busy")
+			if (resMsg != "busy")
+			{
+				label3.Text = Cmd;
+				toClientSend();
+				pictureBox1.BackColor = Color.White;
+			}
+			else
+			{
+				label3.Text = Cmd;
+				pictureBox1.BackColor = Color.MistyRose;
+			}
+
+		}
 	}
 }

@@ -1,0 +1,9 @@
+C:\Users\USER\Desktop\HAR\ChatSystem\ChatForRobotisMini\bin\x64\Debug\DF_SpeechRecognition.cs.exe
+C:\Users\USER\Desktop\HAR\ChatSystem\ChatForRobotisMini\bin\x64\Debug\DF_SpeechRecognition.cs.pdb
+C:\Users\USER\Desktop\HAR\ChatSystem\ChatForRobotisMini\bin\x64\Debug\libpxcclr.cs.dll
+C:\Users\USER\Desktop\HAR\ChatSystem\ChatForRobotisMini\obj\x64\Debug\DF_SpeechRecognition.cs_vs2010-15.csprojResolveAssemblyReference.cache
+C:\Users\USER\Desktop\HAR\ChatSystem\ChatForRobotisMini\obj\x64\Debug\voice_recognition.cs.MainForm.resources
+C:\Users\USER\Desktop\HAR\ChatSystem\ChatForRobotisMini\obj\x64\Debug\DF_SpeechRecognition.cs.Properties.Resources.resources
+C:\Users\USER\Desktop\HAR\ChatSystem\ChatForRobotisMini\obj\x64\Debug\DF_SpeechRecognition.cs_vs2010-15.csproj.GenerateResource.Cache
+C:\Users\USER\Desktop\HAR\ChatSystem\ChatForRobotisMini\obj\x64\Debug\DF_SpeechRecognition.cs.exe
+C:\Users\USER\Desktop\HAR\ChatSystem\ChatForRobotisMini\obj\x64\Debug\DF_SpeechRecognition.cs.pdb
